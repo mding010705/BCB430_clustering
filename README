@@ -7,6 +7,8 @@ You will have to look at each script, change the output directories, and downloa
 The directory structure that I worked with looked like this:
 
 BCB430/
+|-scrattch.hicat/
+|  |-you will have to clone this repo from https://github.com/AllenInstitute/scrattch.hicat.git
 |
 |-split_isocortex_data/
 |  |-isocortex.h5ad
@@ -49,6 +51,8 @@ The general steps for my work flow are:
 
 1. python3 subset_isocortexh5ad_pfc_iso.py -> splits isocortex data into non-neuronal, PFC, sex, and age specific subsets into split_isocortex_data/
 2. ./run_hicat_cluster.sh (uses hicat_cluster_job.R) -> hicat clusters expression files in split_isocortex_data/ into clust_res_hicat/ , and puts the final merged clusters into clust_res_hicat/merged
+-> there is an issue with the heatmap3.R script from the scrattch.hicat package due to R version incompatibility
+-> so we work around this by sourcing all the scripts in scrattch.hicat/R and then sourcing new_heatmap3.R to fix the broken function
 3. ./run_label_clusters.sh (uses label_clusters.R) -> labels clusters from clust_res_hicat/merged based on metadata_isocortex.csv into clust_res_hicat/labeled
 3a. Can run silhouette_scores_hitcat.R in RStudio -> plots go into cluster/
 4. ./run_within_cluster_eda_dea.sh (uses within_cluster_eda_dea.R) -> does EDA and DEA on subsets in split_isocortex_data/ based in cell types defined in clust_res_hicat/labeled
