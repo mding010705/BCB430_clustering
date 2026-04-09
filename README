@@ -1,0 +1,61 @@
+This repo has the key scripts for Megan Ding's BCB430 2025-2026 project.
+
+I worked on clustering the isocortex and PFC at different age- and sex-specific levels. I then took the PFC-male-aged vs. PFC-male-adult and PFC-female-aged vs. PFC-female-adult DE genes and analysed them in the context of MDD.
+
+You will have to look at each script, change the output directories, and download the appropriate MDD gene lists, human to mouse homolog, and gmt files to run everything.
+
+The directory structure that I worked with looked like this:
+
+BCB430/
+|
+|-split_isocortex_data/
+|  |-isocortex.h5ad
+|  |-isocortex_aged.h5ad
+|  ...
+|  |-PFC.h5ad
+|  |-PFC_female_aged.h5ad
+|  ...
+|
+|-clust_res_hicat/
+|  |-labeled/
+|  |  |-isocortex.h5ad.rds
+|  |  ...
+|  |  |-PFC_male_adult.h5ad.rds
+|  |
+|  |-merged/
+|  |  |-isocortex.h5ad.rds
+|  |  ...
+|  |  |-PFC_male_adult.h5ad.rds
+|  |
+|  |-isocortex.h5ad.rds
+|  ...
+|  |-PFC_male_adult.h5ad.rds
+|
+|-cluster/
+|  |-isocortex.h5ad/
+|  |  |-DE_results.rds
+|  |  |- other plots and enrichment results
+|  ...
+|  |-PFC_male_adult.h5ad/
+|  |  |- other plots and enrichment results
+|
+|-shell scripts, R scripts, python script
+|-gmt, MDD gene list, and human to mouse homolog files  
+|-metadata_isocortex.csv
+
+You can probably create a cleaner file structure than me :P
+
+The general steps for my work flow are:
+
+1. python3 subset_isocortexh5ad_pfc_iso.py -> splits isocortex data into non-neuronal, PFC, sex, and age specific subsets into split_isocortex_data/
+2. ./run_hicat_cluster.sh (uses hicat_cluster_job.R) -> hicat clusters expression files in split_isocortex_data/ into clust_res_hicat/ , and puts the final merged clusters into clust_res_hicat/merged
+3. ./run_label_clusters.sh (uses label_clusters.R) -> labels clusters from clust_res_hicat/merged based on metadata_isocortex.csv into clust_res_hicat/labeled
+3a. Can run silhouette_scores_hitcat.R in RStudio -> plots go into cluster/
+4. ./run_within_cluster_eda_dea.sh (uses within_cluster_eda_dea.R) -> does EDA and DEA on subsets in split_isocortex_data/ based in cell types defined in clust_res_hicat/labeled
+5. ./run_btwn_cell_label_dea.sh (uses btwn_cell_label_dea.R) -> does DEA on pairs of subsets defined in the script from split_isocortex_data/ based in cell types defined in clust_res_hicat/labeled
+6. ./run_mdd_enrichment.sh (uses mdd_enrichment_btwn_clust.R) -> find overlap of all DE genes within and between all subsets with MDD gene lists and run GO:BP enrichment on the genes in this intersection
+6a. Can run gene_set_overlap_heatmap.R in RStudio -> plots go into cluster/
+7. ./run_mdd_enrichment_dir.sh (uses mdd_enrichment_btwn_clust_dir.R) -> find overlap of all DE genes within and between all subsets with MDD gene lists and run GO:BP enrichment on the genes in this intersection, stratified by increase and decrease depressive burden
+7a. Can run cytoscape_commands.R in RStudio -> you need an instance of Cytoscape running, you will have to use the UI to do any manual adjustments to make the network look nicer
+7b. ./run_enrichment_heatmap_sel_cells.sh (uses enrichment_heatmap_sel_cells.R) -> makes top GO:BP term heatmaps for the selected cell types, stratified by increase and decrease depressive burden
+
